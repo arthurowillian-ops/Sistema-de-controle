@@ -1,0 +1,199 @@
+<!-- Importando as bibliotecas do Firebase (Versão Compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
+<script>
+    // Configurações extraídas do seu print
+    const firebaseConfig = {
+        apiKey: "AIzaSyC7MB3d7zwXhrQiryyhDn6iJO-R47Ckbp8",
+        authDomain: "sistema-br3.firebaseapp.com",
+        databaseURL: "https://sistema-br3-default-rtdb.firebaseio.com/",
+        projectId: "sistema-br3",
+        storageBucket: "sistema-br3.firebasestorage.app",
+        messagingSenderId: "794505118512",
+        appId: "1:794505118512:web:646af1ce3a841f933dfef5"
+    };
+
+    // Inicializando o Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    let historico = [];
+
+    // Função de login (Arthur ou Laura)
+    function autenticar() {
+        const user = document.getElementById('user').value.toLowerCase();
+        const pass = document.getElementById('pass').value;
+        
+        // Aceita seus usuários conhecidos
+        if ((user === "arthurowillian" || user === "arthur.oliveira" || user === "laura") && pass === "123") {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-system').style.display = 'block';
+            init();
+        } else {
+            alert("Usuário ou senha incorretos.");
+        }
+    }
+
+    // Inicialização e Sincronização em Tempo Real
+    function init() {
+        renderRowsDB('body-db', 1000);
+        renderRowsDaily('body-daily', 200);
+        document.getElementById('data-dia').value = new Date().toISOString().split('T')[0];
+        document.getElementById('v-colab').value = '3.25';
+        document.getElementById('v-emp').value = '16.23';
+        
+        // Carrega a Database de Funcionários do Firebase
+        db.ref('br3_database').on('value', snapshot => {
+            const dados = snapshot.val() || [];
+            const inputs = document.querySelectorAll('#body-db input');
+            dados.forEach((v, i) => { if(inputs[i]) inputs[i].value = v; });
+        });
+
+        // Carrega o Histórico de Lançamentos do Firebase
+        db.ref('br3_historico').on('value', snapshot => {
+            historico = snapshot.val() || [];
+            verificarData();
+        });
+
+        setupPasteEvents();
+    }
+
+    // Salvar Funcionários na Nuvem
+    function salvarDB() {
+        const inputs = Array.from(document.querySelectorAll('#body-db input')).map(i => i.value.trim());
+        db.ref('br3_database').set(inputs)
+            .then(() => alert("Database sincronizada no Firebase!"))
+            .catch(e => alert("Erro: " + e.message));
+    }
+
+    // Salvar Lançamento do Dia na Nuvem
+    function salvarDia() {
+        const data = document.getElementById('data-dia').value;
+        const pC = parseFloat(document.getElementById('v-colab').value);
+        const pE = parseFloat(document.getElementById('v-emp').value);
+        const rows = document.querySelectorAll('#body-daily tr');
+        
+        let lancamentosNovos = [];
+        rows.forEach(r => {
+            const code = r.querySelector('.c-code').value.trim();
+            const name = r.querySelector('.c-name').value.trim();
+            if(code) lancamentosNovos.push({ data, code, name, pC, pE });
+        });
+
+        // Atualiza o histórico mantendo o que já existia em outros dias
+        let novoHist = historico.filter(h => h.data !== data).concat(lancamentosNovos);
+        
+        db.ref('br3_historico').set(novoHist)
+            .then(() => alert("Dados do dia " + data + " salvos com sucesso!"))
+            .catch(e => alert("Erro ao salvar: " + e.message));
+    }
+
+    // --- MANTENHA AS OUTRAS FUNÇÕES ORIGINAIS ABAIXO ---
+    function renderRowsDB(id, num) {
+        const tbody = document.getElementById(id);
+        let html = '';
+        for(let i=0; i<num; i++) html += `<tr><td><input type="text" class="c-ref"></td><td><input type="text" class="c-real"></td><td><input type="text" class="c-name"></td></tr>`;
+        tbody.innerHTML = html;
+    }
+
+    function renderRowsDaily(id, num) {
+        const tbody = document.getElementById(id);
+        let html = '';
+        for(let i=0; i<num; i++) html += `<tr><td><input type="text" class="c-code"></td><td><input type="text" class="c-name"></td></tr>`;
+        tbody.innerHTML = html;
+    }
+
+    function setupPasteEvents() {
+        ['table-db', 'table-daily'].forEach(tableId => {
+            document.getElementById(tableId).addEventListener('paste', function(e) {
+                e.preventDefault();
+                const text = (e.clipboardData || window.clipboardData).getData('text');
+                const rows = text.split(/\r?\n/);
+                const activeElem = document.activeElement;
+                if (activeElem.tagName !== 'INPUT') return;
+                const activeCell = activeElem.closest('td');
+                const activeRow = activeCell.closest('tr');
+                const startRowIndex = Array.from(activeRow.parentNode.children).indexOf(activeRow);
+                const startColIndex = Array.from(activeRow.children).indexOf(activeCell);
+                rows.forEach((rowText, i) => {
+                    if (!rowText.trim()) return;
+                    const cols = rowText.split('\t');
+                    const targetRow = activeRow.parentNode.children[startRowIndex + i];
+                    if (targetRow) {
+                        cols.forEach((colText, j) => {
+                            const targetCell = targetRow.children[startColIndex + j];
+                            if (targetCell) {
+                                const input = targetCell.querySelector('input');
+                                if (input) input.value = colText.trim();
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    }
+
+    function verificarData() {
+        const dataSel = document.getElementById('data-dia').value;
+        const inputs = document.querySelectorAll('#body-daily input');
+        inputs.forEach(i => i.value = '');
+        const doDia = historico.filter(h => h.data === dataSel);
+        doDia.forEach((reg, i) => {
+            if(inputs[i*2]) inputs[i*2].value = reg.code;
+            if(inputs[i*2+1]) inputs[i*2+1].value = reg.name;
+        });
+        const q = doDia.length;
+        const c = parseFloat(document.getElementById('v-colab').value);
+        const e = parseFloat(document.getElementById('v-emp').value);
+        document.getElementById('r-qtd').innerText = q;
+        document.getElementById('r-colab').innerText = `R$ ${(q*c).toFixed(2)}`;
+        document.getElementById('r-emp').innerText = `R$ ${(q*e).toFixed(2)}`;
+    }
+
+    function carregarHist() {
+        document.getElementById('body-hist').innerHTML = historico.map(h => `<tr><td>${h.name}</td><td>${h.data}</td><td>${h.code}</td><td>R$ ${h.pC.toFixed(2)}</td><td>R$ ${h.pE.toFixed(2)}</td></tr>`).join('');
+    }
+
+    function gerarMensal() {
+        const mes = document.getElementById('filtro-mes').value;
+        const res = {};
+        const inputsDB = Array.from(document.querySelectorAll('#body-db input')).map(i => i.value.trim());
+        const dePara = {};
+        for(let i=0; i<inputsDB.length; i+=3) { if(inputsDB[i]) dePara[inputsDB[i]] = inputsDB[i+1]; }
+
+        historico.filter(h => h.data.startsWith(mes)).forEach(h => {
+            if(!res[h.code]) res[h.code] = { nome: h.name, real: dePara[h.code] || '---', q: 0, tc: 0, te: 0 };
+            res[h.code].q++; res[h.code].tc += h.pC; res[h.code].te += h.pE;
+        });
+        document.getElementById('body-mensal').innerHTML = Object.entries(res).map(([cod, f]) => `<tr><td>${cod}</td><td>${f.real}</td><td>${f.nome}</td><td>${f.q}</td><td>R$ ${f.tc.toFixed(2)}</td><td>R$ ${f.te.toFixed(2)}</td></tr>`).join('');
+    }
+
+    function openTab(evt, name) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(name).classList.add('active');
+        evt.currentTarget.classList.add('active');
+        if(name === 'aba-hist') carregarHist();
+        if(name === 'aba-mensal') gerarMensal();
+    }
+
+    function exportarExcel() {
+        let csv = "\uFEFF";
+        document.querySelectorAll("#tabela-mensal tr").forEach(tr => {
+            let row = [];
+            tr.querySelectorAll("th, td").forEach(td => row.push(`"${td.innerText}"`));
+            csv += row.join(";") + "\n";
+        });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+        link.download = "fechamento_br3.csv"; link.click();
+    }
+
+    document.getElementById('btnAcoes').onclick = function(e) { document.getElementById('menuAcoes').classList.toggle('show'); e.stopPropagation(); };
+    window.onclick = function() { document.getElementById('menuAcoes').classList.remove('show'); };
+    document.getElementById('togglePassword').onclick = function() {
+        const input = document.getElementById('pass');
+        input.type = input.type === 'password' ? 'text' : 'password';
+        this.classList.toggle('fa-eye'); this.classList.toggle('fa-eye-slash');
+    };
+</script>
