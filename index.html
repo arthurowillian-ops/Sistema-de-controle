@@ -1,9 +1,91 @@
-<!-- Importando as bibliotecas do Firebase (Versão Compat) -->
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema BR3 - Controle de Almoço</title>
+    <!-- Bibliotecas Necessárias -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+    <style>
+        :root { --primary: #2c3e50; --secondary: #e74c3c; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 90%; max-width: 800px; }
+        #login-screen { text-align: center; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
+        button:hover { opacity: 0.9; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { background: #eee; color: #333; flex: 1; padding: 10px; }
+        .tab-btn.active { background: var(--primary); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f8f9fa; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen">
+        <h2><i class="fas fa-utensils"></i> Sistema BR3</h2>
+        <input type="text" id="user" placeholder="Usuário (Ex: arthuruwillian)">
+        <div style="position:relative;">
+            <input type="password" id="pass" placeholder="Senha">
+            <i id="togglePassword" class="fas fa-eye" style="position:absolute; right:10px; top:20px; cursor:pointer;"></i>
+        </div>
+        <button onclick="autenticar()">ENTRAR</button>
+    </div>
+
+    <!-- SISTEMA PRINCIPAL (Inicia oculto) -->
+    <div id="main-system" style="display:none;">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openTab(event, 'aba-daily')">Lançamento</button>
+            <button class="tab-btn" onclick="openTab(event, 'aba-db')">Funcionários</button>
+            <button class="tab-btn" onclick="openTab(event, 'aba-mensal')">Fechamento</button>
+        </div>
+
+        <!-- ABA LANÇAMENTO -->
+        <div id="aba-daily" class="tab-content active">
+            <input type="date" id="data-dia" onchange="verificarData()">
+            <div style="display:flex; gap:10px;">
+                <input type="number" id="v-colab" step="0.01" placeholder="Valor Colab">
+                <input type="number" id="v-emp" step="0.01" placeholder="Valor Emp">
+            </div>
+            <table id="table-daily">
+                <thead><tr><th>Código</th><th>Nome</th></tr></thead>
+                <tbody id="body-daily"></tbody>
+            </table>
+            <button onclick="salvarDia()" style="margin-top:15px; background: #27ae60;">SALVAR DIA</button>
+        </div>
+
+        <!-- ABA DATABASE -->
+        <div id="aba-db" class="tab-content">
+            <h3>Cadastro de Funcionários</h3>
+            <table id="table-db">
+                <thead><tr><th>Ref</th><th>Código Real</th><th>Nome Completo</th></tr></thead>
+                <tbody id="body-db"></tbody>
+            </table>
+            <button onclick="salvarDB()" style="margin-top:15px;">SALVAR LISTA</button>
+        </div>
+
+        <!-- ABA FECHAMENTO -->
+        <div id="aba-mensal" class="tab-content">
+            <input type="month" id="filtro-mes" onchange="gerarMensal()">
+            <table id="tabela-mensal">
+                <thead><tr><th>Cod</th><th>Real</th><th>Nome</th><th>Qtd</th><th>Total Colab</th><th>Total Emp</th></tr></thead>
+                <tbody id="body-mensal"></tbody>
+            </table>
+            <button onclick="exportarExcel()" style="margin-top:15px; background: #f39c12;">EXPORTAR EXCEL</button>
+        </div>
+    </div>
+</div>
 
 <script>
-    // Configurações extraídas do seu print
+    // Configurações do seu Firebase (conforme image_d64678.png)
     const firebaseConfig = {
         apiKey: "AIzaSyC7MB3d7zwXhrQiryyhDn6iJO-R47Ckbp8",
         authDomain: "sistema-br3.firebaseapp.com",
@@ -14,186 +96,110 @@
         appId: "1:794505118512:web:646af1ce3a841f933dfef5"
     };
 
-    // Inicializando o Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let historico = [];
 
-    // Função de login (Arthur ou Laura)
     function autenticar() {
-        const user = document.getElementById('user').value.toLowerCase();
-        const pass = document.getElementById('pass').value;
-        
-        // Aceita seus usuários conhecidos
-        if ((user === "arthurowillian" || user === "arthur.oliveira" || user === "laura") && pass === "123") {
+        const u = document.getElementById('user').value.toLowerCase();
+        const p = document.getElementById('pass').value;
+        if ((u === "arthurowillian" || u === "arthur.oliveira" || u === "laura") && p === "123") {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-system').style.display = 'block';
             init();
-        } else {
-            alert("Usuário ou senha incorretos.");
-        }
+        } else { alert("Acesso negado"); }
     }
 
-    // Inicialização e Sincronização em Tempo Real
     function init() {
-        renderRowsDB('body-db', 1000);
-        renderRowsDaily('body-daily', 200);
+        renderRows('body-db', 500, 3);
+        renderRows('body-daily', 100, 2);
         document.getElementById('data-dia').value = new Date().toISOString().split('T')[0];
         document.getElementById('v-colab').value = '3.25';
         document.getElementById('v-emp').value = '16.23';
-        
-        // Carrega a Database de Funcionários do Firebase
-        db.ref('br3_database').on('value', snapshot => {
-            const dados = snapshot.val() || [];
-            const inputs = document.querySelectorAll('#body-db input');
-            dados.forEach((v, i) => { if(inputs[i]) inputs[i].value = v; });
+
+        db.ref('br3_database').on('value', s => {
+            const d = s.val() || [];
+            const ins = document.querySelectorAll('#body-db input');
+            d.forEach((v, i) => { if(ins[i]) ins[i].value = v; });
         });
 
-        // Carrega o Histórico de Lançamentos do Firebase
-        db.ref('br3_historico').on('value', snapshot => {
-            historico = snapshot.val() || [];
+        db.ref('br3_historico').on('value', s => {
+            historico = s.val() || [];
             verificarData();
         });
-
-        setupPasteEvents();
     }
 
-    // Salvar Funcionários na Nuvem
+    function renderRows(id, n, cols) {
+        const b = document.getElementById(id);
+        let h = '';
+        for(let i=0; i<n; i++) {
+            h += '<tr>';
+            for(let j=0; j<cols; j++) h += '<td><input type="text"></td>';
+            h += '</tr>';
+        }
+        b.innerHTML = h;
+    }
+
     function salvarDB() {
-        const inputs = Array.from(document.querySelectorAll('#body-db input')).map(i => i.value.trim());
-        db.ref('br3_database').set(inputs)
-            .then(() => alert("Database sincronizada no Firebase!"))
-            .catch(e => alert("Erro: " + e.message));
+        const ins = Array.from(document.querySelectorAll('#body-db input')).map(i => i.value.trim());
+        db.ref('br3_database').set(ins).then(() => alert("Sincronizado!"));
     }
 
-    // Salvar Lançamento do Dia na Nuvem
     function salvarDia() {
-        const data = document.getElementById('data-dia').value;
-        const pC = parseFloat(document.getElementById('v-colab').value);
-        const pE = parseFloat(document.getElementById('v-emp').value);
+        const dt = document.getElementById('data-dia').value;
+        const pc = parseFloat(document.getElementById('v-colab').value);
+        const pe = parseFloat(document.getElementById('v-emp').value);
         const rows = document.querySelectorAll('#body-daily tr');
-        
-        let lancamentosNovos = [];
+        let novos = [];
         rows.forEach(r => {
-            const code = r.querySelector('.c-code').value.trim();
-            const name = r.querySelector('.c-name').value.trim();
-            if(code) lancamentosNovos.push({ data, code, name, pC, pE });
+            const v = r.querySelectorAll('input');
+            if(v[0].value) novos.push({ data: dt, code: v[0].value, name: v[1].value, pC: pc, pE: pe });
         });
-
-        // Atualiza o histórico mantendo o que já existia em outros dias
-        let novoHist = historico.filter(h => h.data !== data).concat(lancamentosNovos);
-        
-        db.ref('br3_historico').set(novoHist)
-            .then(() => alert("Dados do dia " + data + " salvos com sucesso!"))
-            .catch(e => alert("Erro ao salvar: " + e.message));
-    }
-
-    // --- MANTENHA AS OUTRAS FUNÇÕES ORIGINAIS ABAIXO ---
-    function renderRowsDB(id, num) {
-        const tbody = document.getElementById(id);
-        let html = '';
-        for(let i=0; i<num; i++) html += `<tr><td><input type="text" class="c-ref"></td><td><input type="text" class="c-real"></td><td><input type="text" class="c-name"></td></tr>`;
-        tbody.innerHTML = html;
-    }
-
-    function renderRowsDaily(id, num) {
-        const tbody = document.getElementById(id);
-        let html = '';
-        for(let i=0; i<num; i++) html += `<tr><td><input type="text" class="c-code"></td><td><input type="text" class="c-name"></td></tr>`;
-        tbody.innerHTML = html;
-    }
-
-    function setupPasteEvents() {
-        ['table-db', 'table-daily'].forEach(tableId => {
-            document.getElementById(tableId).addEventListener('paste', function(e) {
-                e.preventDefault();
-                const text = (e.clipboardData || window.clipboardData).getData('text');
-                const rows = text.split(/\r?\n/);
-                const activeElem = document.activeElement;
-                if (activeElem.tagName !== 'INPUT') return;
-                const activeCell = activeElem.closest('td');
-                const activeRow = activeCell.closest('tr');
-                const startRowIndex = Array.from(activeRow.parentNode.children).indexOf(activeRow);
-                const startColIndex = Array.from(activeRow.children).indexOf(activeCell);
-                rows.forEach((rowText, i) => {
-                    if (!rowText.trim()) return;
-                    const cols = rowText.split('\t');
-                    const targetRow = activeRow.parentNode.children[startRowIndex + i];
-                    if (targetRow) {
-                        cols.forEach((colText, j) => {
-                            const targetCell = targetRow.children[startColIndex + j];
-                            if (targetCell) {
-                                const input = targetCell.querySelector('input');
-                                if (input) input.value = colText.trim();
-                            }
-                        });
-                    }
-                });
-            });
-        });
+        let f = historico.filter(h => h.data !== dt).concat(novos);
+        db.ref('br3_historico').set(f).then(() => alert("Dia Salvo!"));
     }
 
     function verificarData() {
-        const dataSel = document.getElementById('data-dia').value;
-        const inputs = document.querySelectorAll('#body-daily input');
-        inputs.forEach(i => i.value = '');
-        const doDia = historico.filter(h => h.data === dataSel);
-        doDia.forEach((reg, i) => {
-            if(inputs[i*2]) inputs[i*2].value = reg.code;
-            if(inputs[i*2+1]) inputs[i*2+1].value = reg.name;
+        const dt = document.getElementById('data-dia').value;
+        const ins = document.querySelectorAll('#body-daily input');
+        ins.forEach(i => i.value = '');
+        const doDia = historico.filter(h => h.data === dt);
+        doDia.forEach((r, i) => {
+            if(ins[i*2]) ins[i*2].value = r.code;
+            if(ins[i*2+1]) ins[i*2+1].value = r.name;
         });
-        const q = doDia.length;
-        const c = parseFloat(document.getElementById('v-colab').value);
-        const e = parseFloat(document.getElementById('v-emp').value);
-        document.getElementById('r-qtd').innerText = q;
-        document.getElementById('r-colab').innerText = `R$ ${(q*c).toFixed(2)}`;
-        document.getElementById('r-emp').innerText = `R$ ${(q*e).toFixed(2)}`;
-    }
-
-    function carregarHist() {
-        document.getElementById('body-hist').innerHTML = historico.map(h => `<tr><td>${h.name}</td><td>${h.data}</td><td>${h.code}</td><td>R$ ${h.pC.toFixed(2)}</td><td>R$ ${h.pE.toFixed(2)}</td></tr>`).join('');
     }
 
     function gerarMensal() {
-        const mes = document.getElementById('filtro-mes').value;
+        const m = document.getElementById('filtro-mes').value;
         const res = {};
-        const inputsDB = Array.from(document.querySelectorAll('#body-db input')).map(i => i.value.trim());
-        const dePara = {};
-        for(let i=0; i<inputsDB.length; i+=3) { if(inputsDB[i]) dePara[inputsDB[i]] = inputsDB[i+1]; }
-
-        historico.filter(h => h.data.startsWith(mes)).forEach(h => {
-            if(!res[h.code]) res[h.code] = { nome: h.name, real: dePara[h.code] || '---', q: 0, tc: 0, te: 0 };
+        historico.filter(h => h.data.startsWith(m)).forEach(h => {
+            if(!res[h.code]) res[h.code] = { n: h.name, q: 0, tc: 0, te: 0 };
             res[h.code].q++; res[h.code].tc += h.pC; res[h.code].te += h.pE;
         });
-        document.getElementById('body-mensal').innerHTML = Object.entries(res).map(([cod, f]) => `<tr><td>${cod}</td><td>${f.real}</td><td>${f.nome}</td><td>${f.q}</td><td>R$ ${f.tc.toFixed(2)}</td><td>R$ ${f.te.toFixed(2)}</td></tr>`).join('');
+        document.getElementById('body-mensal').innerHTML = Object.entries(res).map(([c, f]) => 
+            `<tr><td>${c}</td><td>-</td><td>${f.n}</td><td>${f.q}</td><td>${f.tc.toFixed(2)}</td><td>${f.te.toFixed(2)}</td></tr>`
+        ).join('');
     }
 
-    function openTab(evt, name) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    function openTab(e, n) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(name).classList.add('active');
-        evt.currentTarget.classList.add('active');
-        if(name === 'aba-hist') carregarHist();
-        if(name === 'aba-mensal') gerarMensal();
+        document.getElementById(n).classList.add('active');
+        e.currentTarget.classList.add('active');
     }
 
     function exportarExcel() {
         let csv = "\uFEFF";
         document.querySelectorAll("#tabela-mensal tr").forEach(tr => {
-            let row = [];
-            tr.querySelectorAll("th, td").forEach(td => row.push(`"${td.innerText}"`));
-            csv += row.join(";") + "\n";
+            let r = []; tr.querySelectorAll("th, td").forEach(td => r.push(`"${td.innerText}"`));
+            csv += r.join(";") + "\n";
         });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-        link.download = "fechamento_br3.csv"; link.click();
+        const l = document.createElement("a");
+        l.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+        l.download = "br3_mensal.csv"; l.click();
     }
-
-    document.getElementById('btnAcoes').onclick = function(e) { document.getElementById('menuAcoes').classList.toggle('show'); e.stopPropagation(); };
-    window.onclick = function() { document.getElementById('menuAcoes').classList.remove('show'); };
-    document.getElementById('togglePassword').onclick = function() {
-        const input = document.getElementById('pass');
-        input.type = input.type === 'password' ? 'text' : 'password';
-        this.classList.toggle('fa-eye'); this.classList.toggle('fa-eye-slash');
-    };
+</script>
+</body>
+</html>
 </script>
