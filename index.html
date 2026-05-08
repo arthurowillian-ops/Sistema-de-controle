@@ -36,9 +36,12 @@
         .header-app { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 15px; background: var(--white); padding: 12px 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
         
         .table-card { background: white; border-radius: 16px; overflow-x: auto; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; min-width: 450px; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th { background: #f8f9fa; padding: 12px; text-align: left; font-size: 11px; color: #888; text-transform: uppercase; }
         td { padding: 10px 12px; border-bottom: 1px solid #f1f1f1; font-size: 13px; }
+
+        .status-cell { font-size: 11px; color: #666; line-height: 1.2; }
+        .pct-badge { background: #e0f7fa; color: #00838f; padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-right: 5px; }
 
         .check-container { display: flex; flex-direction: column; gap: 10px; width: 100%; }
         .check-row { 
@@ -112,7 +115,7 @@
             </div>
             <div class="table-card">
                 <table>
-                    <thead><tr><th>ID Projeto</th><th>Cód. Express</th><th>OP</th><th>Gestão</th></tr></thead>
+                    <thead><tr><th>ID Projeto</th><th>Cód. Express</th><th>OP</th><th>Status Atual</th><th>Gestão</th></tr></thead>
                     <tbody id="body-units"></tbody>
                 </table>
             </div>
@@ -157,7 +160,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // TODA A SUA LÓGICA DE DADOS RESTAURADA
         const dbM = [
             ["7.00.SGC0018","EXPRESS 291","006307"],["7.00.0000015","EXPRESS 292","006306"],["7.00.SGC0017","EXPRESS 293","006308"],["7.00.0000014","EXPRESS 294","006309"],["7.00.SGC0016","EXPRESS 295","006310"],["7.00.0000015","EXPRESS 296","006311"],["7.00.SGC0013","EXPRESS 297","006312"],["7.00.0000014","EXPRESS 298","006313"],["7.00.0000018","EXPRESS 299","006314"],["7.00.0000015","EXPRESS 300","006315"],["7.00.0000017","EXPRESS 301","006316"],["7.00.0000014","EXPRESS 302","006317"],["7.00.0000016","EXPRESS 303","006641"],["7.00.0000015","EXPRESS 304","006319"],["7.00.0000013","EXPRESS 305","006320"],["7.00.0000014","EXPRESS 306","006321"],["7.00.SGC0018","EXPRESS 307","006322"],["7.00.0000015","EXPRESS 308","006323"],["7.00.SGC0017","EXPRESS 309","006324"],["7.00.0000014","EXPRESS 310","006325"],["7.00.SGC0016","EXPRESS 311","006326"],["7.00.0000015","EXPRESS 312","006327"],["7.00.SGC0013","EXPRESS 313","006328"],["7.00.0000014","EXPRESS 314","006329"],["7.00.0000018","EXPRESS 315","006330"],["7.00.0000015","EXPRESS 316","006331"],["7.00.0000017","EXPRESS 317","006332"],["7.00.0000014","EXPRESS 318","006333"],["7.00.0000016","EXPRESS 319","006334"],["7.00.0000015","EXPRESS 320","006335"],["7.00.0000013","EXPRESS 321","006336"],["7.00.0000014","EXPRESS 322","006337"]
         ];
@@ -192,14 +194,29 @@
 
         const tP = [
             {p:"CORTE - SL 01", a:"DATA INÍCIO", d:1}, {p:"CORTE - SL 01", a:"DATA FIM", d:1}, {p:"CORTE - SL 01", a:"CONCLUÍDO", c:1},
-            {p:"SL 02", a:"MONTAGEM QUADROS METALON", c:1}, {p:"SL 03", a:"EMPLACAMENTO QUADROS METALON", c:1}, {p:"SL 05", a:"CORTE DE PLACAS", c:1},
-            {p:"VOLUMETRIZAÇÃO - SL 07", a:"DATA INÍCIO", d:1}, {p:"VOLUMETRIZAÇÃO - SL 07", a:"DATA FIM", d:1}, {p:"VOLUMETRIZAÇÃO - SL 07", a:"CONCLUÍDO", c:1},
-            {p:"SL 08 - DIA 1", a:"INSTALAÇÃO ELÉTRICA / HIDRÁULICA", c:1}, {p:"SL 08 - DIA 1", a:"APLICAÇÃO D11", c:1},
-            {p:"SL 08 - DIA 2", a:"APLICAÇÃO DF-9", c:1}, {p:"SL 08 - DIA 2", a:"LÃ DE PET", c:1},
-            {p:"SL 08 - DIA 3/4", a:"CERÂMICA PISO E PAREDE", c:1},
-            {p:"SL 08 - DIA 5", a:"INSTALAÇÃO DO FORRO PVC", c:1}, {p:"SL 08 - DIA 5", a:"REJUNTE", c:1},
-            {p:"SL 08 - DIA 6", a:"INST. LOUÇAS E METAIS", c:1}, {p:"SL 08 - DIA 6", a:"INST. PORTA DE MADEIRA", c:1},
-            {p:"SL 08 - DIA 7", a:"INST. VISTAS/NICHO", c:1}, {p:"SL 08 - DIA 7", a:"ACABAMENTO EM SILICONE", c:1}
+            {p:"SL 02", a:"MONTAGEM DOS QUADROS DE METALON", c:1}, 
+            {p:"SL 03", a:"EMPLACAMENTO DOS QUADROS DE METALON", c:1}, 
+            {p:"SL 05", a:"CORTE DE PLACAS", c:1},
+            {p:"VOL- SL 07", a:"DATA INÍCIO", d:1}, {p:"VOL- SL 07", a:"DATA FIM", d:1}, {p:"VOL- SL 07", a:"CONCLUÍDO", c:1},
+            {p:"SL 08 - DIA 1", a:"INST. ELÉTRICA", c:1}, 
+            {p:"SL 08 - DIA 1", a:"INST. HIDRÁULICA + TESTE DE ESTANQUEIDADE", c:1},
+            {p:"SL 08 - DIA 1", a:"PREPARAÇÃO DA SUPERFICIE", c:1},
+            {p:"SL 08 - DIA 2", a:"APLICAÇÃO D11", c:1}, 
+            {p:"SL 08 - DIA 2", a:"APLICAÇÃO DF-9", c:1},
+            {p:"SL 08 - DIA 2", a:"LÃ DE PET", c:1},
+            {p:"SL 08 - DIA 3", a:"CERÂMICA PISO", c:1},
+            {p:"SL 08 - DIA 3", a:"CERÂMICA PAREDE", c:1},
+            {p:"SL 08 - DIA 4", a:"CERÂMICA PAREDE", c:1},
+            {p:"SL 08 - DIA 5", a:"INSTALAÇÃO DO FORRO PVC", c:1}, 
+            {p:"SL 08 - DIA 5", a:"REJUNTE", c:1},
+            {p:"SL 08 - DIA 6", a:"LIMPEZA REJUNTE", c:1},
+            {p:"SL 08 - DIA 6", a:"INST. ACABAMENTO ELÉTRICO", c:1},
+            {p:"SL 08 - DIA 6", a:"INST. LOUÇAS E METAIS", c:1},
+            {p:"SL 08 - DIA 6", a:"INST. PORTA DE MADEIRA", c:1},
+            {p:"SL 08 - DIA 7", a:"INST. PORTINHOLA", c:1},
+            {p:"SL 08 - DIA 7", a:"INST. VISTAS INTERNAS", c:1},
+            {p:"SL 08 - DIA 7", a:"INST. NICHO", c:1},
+            {p:"SL 08 - DIA 7", a:"ACABAMENTO EM SILICONE", c:1}
         ];
 
         let cur = {};
@@ -210,16 +227,45 @@
             window.scrollTo(0,0);
         }
 
-        function loadList(type) {
+        async function loadList(type) {
             const body = document.getElementById('body-units');
-            body.innerHTML = "";
+            body.innerHTML = "<tr><td colspan='5' style='text-align:center'>Carregando status online...</td></tr>";
             const data = (type === 'MODULO') ? dbM : dbP;
+            const tasks = (type === 'MODULO') ? tM : tP;
             document.getElementById('list-title').innerText = type === 'MODULO' ? "Módulos de Produção" : "Pods Hidrossanitários";
+            
+            // Busca dados de todas as unidades para mostrar progresso
+            const snapshot = await db.ref('conferencias').once('value');
+            const allSaved = snapshot.val() || {};
+            
+            body.innerHTML = "";
             data.forEach(u => {
                 const id = type === 'MODULO' ? u[0] : u[1];
                 const exp = type === 'MODULO' ? u[1] : u[2];
                 const op = type === 'MODULO' ? u[2] : u[3];
-                body.innerHTML += `<tr><td><b>${id}</b></td><td>${exp}</td><td>${op}</td><td><button onclick="openCheck('${id}','${exp}','${op}','${type}')">Conferir</button></td></tr>`;
+                const path = exp.replace(/\./g, '_');
+                const saved = allSaved[path] || {};
+                
+                // Cálculo de progresso e última atividade
+                let done = 0, total = 0, lastTask = "A iniciar";
+                tasks.forEach((t, i) => {
+                    if(t.c) {
+                        total++;
+                        if(saved['c_'+i]) {
+                            done++;
+                            lastTask = `<b>${t.p}</b> ${t.a}`;
+                        }
+                    }
+                });
+                const p = Math.round((done/total)*100) || 0;
+
+                body.innerHTML += `<tr>
+                    <td><b>${id}</b></td>
+                    <td>${exp}</td>
+                    <td>${op}</td>
+                    <td class="status-cell"><span class="pct-badge">${p}%</span><br><small>${lastTask}</small></td>
+                    <td><button onclick="openCheck('${id}','${exp}','${op}','${type}')">Conferir</button></td>
+                </tr>`;
             });
             show('scr-list');
         }
@@ -228,7 +274,6 @@
             cur = { id, exp, op, type, path: exp.replace(/\./g, '_') };
             document.getElementById('info-header').innerHTML = `<div><small>PROJETO</small><br><b>${id}</b></div><div><small>EXPRESS</small><br><b>${exp}</b></div><div><small>OP</small><br><b>${op}</b></div>`;
             
-            // BUSCA NO FIREBASE
             const snapshot = await db.ref('conferencias/' + cur.path).once('value');
             const saved = snapshot.val() || {};
 
@@ -253,8 +298,6 @@
             const data = { obs: document.getElementById('obs-main').value, lastUpdate: Date.now() };
             document.querySelectorAll('.d-in').forEach(el => data['d_'+el.dataset.idx] = el.value);
             document.querySelectorAll('.c-in').forEach(el => data['c_'+el.dataset.idx] = el.checked);
-            
-            // GRAVA NO FIREBASE
             db.ref('conferencias/' + cur.path).update(data);
             updateUI();
         }
