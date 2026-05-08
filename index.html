@@ -169,27 +169,30 @@
         ];
 
         const tM = [
-            {p:"CORTE PILARES - SL 01", a:"DATA INÍCIO", d:1}, {p:"CORTE PILARES - SL 01", a:"DATA FIM", d:1}, {p:"CORTE PILARES - SL 01", a:"CONCLUÍDO", c:1},
-            {p:"CORTE MÓDULOS - SL 01", a:"DATA INÍCIO", d:1}, {p:"CORTE MÓDULOS - SL 01", a:"DATA FIM", d:1}, {p:"CORTE MÓDULOS - SL 01", a:"CONCLUÍDO", c:1},
-            {p:"SL 02", a:"MONTAGEM DOS PILARES", c:1},
-            {p:"SL 03-A", a:"MONTAGEM PAREDES MENORES (FRENTE)", c:1}, {p:"SL 03-A", a:"MONTAGEM PAREDES MENORES (ATRÁS)", c:1},
-            {p:"SL 03-B", a:"MONTAGEM PAREDES MAIORES (ESQUERDA)", c:1}, {p:"SL 03-B", a:"MONTAGEM PAREDES MAIORES (DIREITA)", c:1},
-            {p:"SL 03-C", a:"MONTAGEM DA COBERTURA", c:1}, {p:"SL 03-C", a:"MONTAGEM DO PISO", c:1},
-            {p:"SL 05", a:"CORTE DO PORCELANATO", c:1}, {p:"SL 06", a:"CORTE DE PLACAS", c:1}, {p:"SL 04", a:"EMPLACAMENTO", c:1},
-            {p:"VOLUMETRIZAÇÃO - SL 10", a:"DATA INÍCIO", d:1}, {p:"VOLUMETRIZAÇÃO - SL 10", a:"DATA FIM", d:1}, {p:"VOLUMETRIZAÇÃO - SL 10", a:"CONCLUÍDO", c:1},
+            {p:"CORTE DOS PILARES - SL 01", a:"INICIO", d:1}, {p:"CORTE DOS PILARES - SL 01", a:"FIM", d:1}, {p:"CORTE DOS PILARES - SL 01", a:"CONCLUÍDO", c:1},
+            {p:"CORTE DOS MÓDULOS - SL 01", a:"INICIO", d:1}, {p:"CORTE DOS MÓDULOS - SL 01", a:"FIM", d:1}, {p:"CORTE DOS MÓDULOS - SL 01", a:"CONCLUÍDO", c:1},
+            {p:"SL 02", a:"MONT. PILARES", c:1},
+            {p:"SL 03 - A", a:"MONT. PAREDES MENORES (FRENTE)", c:1}, {p:"SL 03 - A", a:"MONT. PAREDES MENORES (ATRÁS)", c:1},
+            {p:"SL 03 - B", a:"MONT. PAREDES MAIORES (ESQ.)", c:1}, {p:"SL 03 - B", a:"MONT. PAREDES MAIORES (DIR.)", c:1},
+            {p:"SL 03 - C", a:"MONT. COBERTURA", c:1}, {p:"SL 03 - C", a:"MONT. PISO", c:1},
+            {p:"SL 05", a:"CORTE PORCELANATO", c:1}, 
+            {p:"SL 06", a:"CORTE DE PLACAS", c:1}, 
+            {p:"SL 04", a:"EMPLACAMENTO", c:1},
+            {p:"SL 09", a:"FECHAMENTO PISO", c:1}, {p:"SL 09", a:"FECHAMENTO PISO", c:1},
+            {p:"VOLUMETRIZAÇÃO - SL 10", a:"DATA INICIO", d:1}, {p:"VOLUMETRIZAÇÃO - SL 10", a:"DATA FIM", d:1}, {p:"VOLUMETRIZAÇÃO - SL 10", a:"CONCLUÍDO", c:1},
             {p:"SL 11", a:"CHICOTE ELÉTRICO", c:1}, {p:"SL 12", a:"KIT HIDRÁULICO", c:1}, {p:"SL 14", a:"PINTURA", c:1},
-            {p:"LP 01", a:"INSTALAÇÃO ELÉTRICA", c:1, t:'lp'}, {p:"LP 01", a:"INST. HIDRAULICA + CLIMATIZAÇÃO", c:1, t:'lp'}, {p:"LP 01", a:"LÃ DE PET", c:1, t:'lp'},
-            {p:"LP 01", a:"FECHAMENTO DO FORRO", c:1, t:'lp'}, {p:"LP 01", a:"FECHAMENTO 2ª FACE", c:1, t:'lp'}, {p:"LP 01", a:"CORTES NO FORRO", c:1, t:'lp'}, {p:"LP 01", a:"PREPARAÇÃO IMPERMEABILIZAÇÃO PISO", c:1, t:'lp'},
+            {p:"LP 01", a:"INST. ELÉTRICA", c:1, t:'lp'}, {p:"LP 01", a:"INST. HIDRAULICA + CLIMATIZAÇÃO", c:1, t:'lp'}, {p:"LP 01", a:"LÃ DE PET", c:1, t:'lp'},
+            {p:"LP 01", a:"FECHAMENTO DO FORRO", c:1, t:'lp'}, {p:"LP 01", a:"FECHAMENTO 2ª FACE", c:1, t:'lp'}, {p:"LP 01", a:"CORTES NO FORRO", c:1, t:'lp'}, {p:"LP 01", a:"PREPARAÇÃO IMPERMEABILIZAÇÃO DO PISO", c:1, t:'lp'},
             {p:"LP 02", a:"APLICAÇÃO D11", c:1, t:'lp'}, {p:"LP 02", a:"APLICAÇÃO DF-9", c:1, t:'lp'},
-            {p:"LP 03", a:"TRATAMENTO DE JUNTAS 1ª DEMÃO", c:1, t:'lp'}, {p:"LP 03", a:"TRATAMENTO DE JUNTAS 2ª DEMÃO", c:1, t:'lp'}, {p:"LP 03", a:"INSTALAÇÃO DA SOLEIRA", c:1, t:'lp'},
-            {p:"LP 04", a:"INSTALAÇÃO DOS REQUADROS", c:1, t:'lp'}, {p:"LP 04", a:"TRATAMENTO DE JUNTAS 3ª DEMÃO", c:1, t:'lp'}, {p:"LP 04", a:"ASSENTAMENTO DO PISO", c:1, t:'lp'},
-            {p:"LP 05", a:"ASSENTAMENTO DO PISO", c:1, t:'lp'}, {p:"LP 05", a:"REVESTIMENTO DE PAREDE", c:1, t:'lp'},
-            {p:"LP 06", a:"REVESTIMENTO DE PAREDE", c:1, t:'lp'}, {p:"LP 06", a:"LIXAR TRATAMENTO + FUNDO PREPARADOR", c:1, t:'lp'}, {p:"LP 06", a:"APLICAÇÃO DE FUNDO BRANCO", c:1, t:'lp'},
-            {p:"LP 07", a:"INSTALAÇÃO FORRO PVC", c:1, t:'lp'}, {p:"LP 07", a:"PINTURA 1ª DEMÃO + CATADOS", c:1, t:'lp'}, {p:"LP 07", a:"REJUNTE", c:1, t:'lp'}, {p:"LP 07", a:"LIXAR CATADOS + PINTURA 2ª DEMÃO", c:1, t:'lp'},
-            {p:"LP 08", a:"LIMPEZA DO REJUNTE", c:1, t:'lp'}, {p:"LP 08", a:"INSTALAÇÃO ESQUADRIAS ALUMÍNIO", c:1, t:'lp'},
-            {p:"LP 09", a:"PINTURA PAREDES EXTERNAS", c:1, t:'lp'}, {p:"LP 09", a:"INSTALAÇÃO ACABAMENTOS ELÉTRICOS", c:1, t:'lp'}, {p:"LP 09", a:"INSTALAÇÃO PORTAS MADEIRA", c:1, t:'lp'},
-            {p:"LP 10", a:"INSTALAÇÃO VISTAS + RODAPÉS", c:1, t:'lp'}, {p:"LP 10", a:"ACABAMENTOS EM SILICONE", c:1, t:'lp'},
-            {p:"LP 10", a:"DATA FINALIZAÇÃO", d:1, t:'lp'}, {p:"LP 10", a:"DATA CARREGAMENTO", d:1, t:'lp'}
+            {p:"LP 03", a:"TRATAMENTO DE JUNTAS 1ª DEMÃO", c:1, t:'lp'}, {p:"LP 03", a:"TRATAMENTO DE JUNTAS 2ª DEMÃO", c:1, t:'lp'}, {p:"LP 03", a:"INST. SOLEIRA", c:1, t:'lp'},
+            {p:"LP 04", a:"INST. REQUADROS", c:1, t:'lp'}, {p:"LP 04", a:"TRATAMENTO DE JUNTAS 3ª DEMÃO", c:1, t:'lp'}, {p:"LP 04", a:"ASSENTAMENTO DO PISO", c:1, t:'lp'},
+            {p:"LP 05", a:"ASSENTAMENTO DO PISO", c:1, t:'lp'}, {p:"LP 05", a:"REVISTIMENTO DE PAREDE", c:1, t:'lp'},
+            {p:"LP 06", a:"REVISTIMENTO DE PAREDE", c:1, t:'lp'}, {p:"LP 06", a:"LIXAR TRATAMENTO + FUNDO PREPARADOR", c:1, t:'lp'}, {p:"LP 06", a:"APLICAÇÃO DE FUNDO BRANCO", c:1, t:'lp'},
+            {p:"LP 07", a:"FECHAMENTO PAREDE EXTERNA (TYVEKK + SIDING)", c:1, t:'lp'}, {p:"LP 07", a:"INST. FORRO PVC", c:1, t:'lp'}, {p:"LP 07", a:"PINTURA 1ª DEMÃO + CATADOS", c:1, t:'lp'}, {p:"LP 07", a:"REJUNTE", c:1, t:'lp'}, {p:"LP 07", a:"LIXAR CATADOS + PINTURA 2ª DEMÃO", c:1, t:'lp'},
+            {p:"LP 08", a:"FECHAMENTO PAREDE EXTERNA (TYVEKK + SIDING)", c:1, t:'lp'}, {p:"LP 08", a:"LIMPEZA DO REJUNTE", c:1, t:'lp'}, {p:"LP 08", a:"INST. ESQUADRIAS DE ALUMÍNIO", c:1, t:'lp'},
+            {p:"LP 09", a:"APLICAÇÃO DE PRIMER PAREDES EXTERNAS", c:1, t:'lp'}, {p:"LP 09", a:"PINTURA 1ª DEMÃO PAREDES EXTERNAS", c:1, t:'lp'}, {p:"LP 09", a:"PINTURA 2ª DEMÃO DAS PAREDES EXTERNAS", c:1, t:'lp'}, {p:"LP 09", a:"INSTALAÇÃO DOS ACABAMENTOS ELÉTRICOS", c:1, t:'lp'}, {p:"LP 09", a:"CATADOS COM MASSA CORRIDA", c:1, t:'lp'}, {p:"LP 09", a:"INSTALAÇÃO DAS PORTAS DE MADEIRA", c:1, t:'lp'},
+            {p:"LP 10", a:"VEDAÇÃO DAS PAREDES EXTERNAS", c:1, t:'lp'}, {p:"LP 10", a:"INSTALAÇÃO DAS VISTAS + RODAPÉS", c:1, t:'lp'}, {p:"LP 10", a:"ISOLAMENTO + LIXAR CATADOS + PINTURA 3ª DEMÃO", c:1, t:'lp'}, {p:"LP 10", a:"ACABAMENTOS EM SILICONE", c:1, t:'lp'},
+            {p:"LP 10", a:"FINALIZAÇÃO (DATA)", d:1, t:'lp'}, {p:"LP 10", a:"DATA CARREGAMENTO", d:1, t:'lp'}
         ];
 
         const tP = [
@@ -234,7 +237,6 @@
             const tasks = (type === 'MODULO') ? tM : tP;
             document.getElementById('list-title').innerText = type === 'MODULO' ? "Módulos de Produção" : "Pods Hidrossanitários";
             
-            // Busca dados de todas as unidades para mostrar progresso
             const snapshot = await db.ref('conferencias').once('value');
             const allSaved = snapshot.val() || {};
             
@@ -246,7 +248,6 @@
                 const path = exp.replace(/\./g, '_');
                 const saved = allSaved[path] || {};
                 
-                // Cálculo de progresso e última atividade
                 let done = 0, total = 0, lastTask = "A iniciar";
                 tasks.forEach((t, i) => {
                     if(t.c) {
